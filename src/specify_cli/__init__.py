@@ -1507,15 +1507,12 @@ NATIVE_SKILLS_AGENTS = {"codex", "kimi"}
 
 # Enhanced descriptions for each spec-kit command skill
 SKILL_DESCRIPTIONS = {
-    "specify": "Create or update feature specifications from natural language descriptions. Use when starting new features or refining requirements. Generates spec.md with user stories, functional requirements, and acceptance criteria following spec-driven development methodology.",
-    "plan": "Generate technical implementation plans from feature specifications. Use after creating a spec to define architecture, tech stack, and implementation phases. Creates plan.md with detailed technical design.",
-    "tasks": "Break down implementation plans into actionable task lists. Use after planning to create a structured task breakdown. Generates tasks.md with ordered, dependency-aware tasks.",
-    "implement": "Execute all tasks from the task breakdown to build the feature. Use after task generation to systematically implement the planned solution following TDD approach where applicable.",
-    "analyze": "Perform cross-artifact consistency analysis across spec.md, plan.md, and tasks.md. Use after task generation to identify gaps, duplications, and inconsistencies before implementation.",
-    "clarify": "Structured clarification workflow for underspecified requirements. Use before planning to resolve ambiguities through coverage-based questioning. Records answers in spec clarifications section.",
+    "plan": "Create a unified feature plan including requirements, technical design, research, and task breakdown. Use to start a new feature - describes what to build, tech stack, and generates actionable tasks in one step.",
+    "execute": "Execute all tasks from the plan to build the feature. Use after planning to systematically implement the solution following the phased task breakdown.",
+    "refine": "Modify an existing feature plan before execution. Use to adjust tech stack, add user stories, change requirements, or reorganize tasks without starting over.",
     "constitution": "Create or update project governing principles and development guidelines. Use at project start to establish code quality, testing standards, and architectural constraints that guide all development.",
     "checklist": "Generate custom quality checklists for validating requirements completeness and clarity. Use to create unit tests for English that ensure spec quality before implementation.",
-    "taskstoissues": "Convert tasks from tasks.md into GitHub issues. Use after task breakdown to track work items in GitHub project management.",
+    "taskstoissues": "Convert tasks from plan.md into GitHub issues. Use after planning to track work items in GitHub project management.",
 }
 
 
@@ -2353,11 +2350,9 @@ def init(
 
     steps_lines.append(f"{step_num}. Start using {usage_label} with your AI agent:")
 
-    steps_lines.append(f"   {step_num}.1 [cyan]{_display_cmd('constitution')}[/] - Establish project principles")
-    steps_lines.append(f"   {step_num}.2 [cyan]{_display_cmd('specify')}[/] - Create baseline specification")
-    steps_lines.append(f"   {step_num}.3 [cyan]{_display_cmd('plan')}[/] - Create implementation plan")
-    steps_lines.append(f"   {step_num}.4 [cyan]{_display_cmd('tasks')}[/] - Generate actionable tasks")
-    steps_lines.append(f"   {step_num}.5 [cyan]{_display_cmd('implement')}[/] - Execute implementation")
+    steps_lines.append(f"   {step_num}.1 [cyan]{_display_cmd('constitution')}[/] - Establish project principles (optional)")
+    steps_lines.append(f"   {step_num}.2 [cyan]{_display_cmd('plan')}[/] - Plan a feature (requirements + tech + tasks)")
+    steps_lines.append(f"   {step_num}.3 [cyan]{_display_cmd('execute')}[/] - Execute the plan")
 
     steps_panel = Panel("\n".join(steps_lines), title="Next Steps", border_style="cyan", padding=(1,2))
     console.print()
@@ -2371,9 +2366,8 @@ def init(
     enhancement_lines = [
         enhancement_intro,
         "",
-        f"○ [cyan]{_display_cmd('clarify')}[/] [bright_black](optional)[/bright_black] - Ask structured questions to de-risk ambiguous areas before planning (run before [cyan]{_display_cmd('plan')}[/] if used)",
-        f"○ [cyan]{_display_cmd('analyze')}[/] [bright_black](optional)[/bright_black] - Cross-artifact consistency & alignment report (after [cyan]{_display_cmd('tasks')}[/], before [cyan]{_display_cmd('implement')}[/])",
-        f"○ [cyan]{_display_cmd('checklist')}[/] [bright_black](optional)[/bright_black] - Generate quality checklists to validate requirements completeness, clarity, and consistency (after [cyan]{_display_cmd('plan')}[/])"
+        f"○ [cyan]{_display_cmd('refine')}[/] [bright_black](optional)[/bright_black] - Modify the plan before executing (change tech stack, add stories, adjust tasks)",
+        f"○ [cyan]{_display_cmd('checklist')}[/] [bright_black](optional)[/bright_black] - Generate quality checklists to validate requirements completeness, clarity, and consistency",
     ]
     enhancements_title = "Enhancement Skills" if native_skill_mode else "Enhancement Commands"
     enhancements_panel = Panel("\n".join(enhancement_lines), title=enhancements_title, border_style="cyan", padding=(1,2))
