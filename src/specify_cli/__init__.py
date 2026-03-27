@@ -1240,7 +1240,7 @@ def scaffold_from_core_pack(
                 tracker.error("scaffold", "scripts directory not found")
             return False
 
-    # Page templates (spec-template.md, plan-template.md, vscode-settings.json, etc.)
+    # Page templates (plan-template.md, vscode-settings.json, etc.)
     if core and (core / "templates").is_dir():
         templates_dir = core / "templates"
     else:
@@ -2771,7 +2771,7 @@ def preset_search(
 
 @preset_app.command("resolve")
 def preset_resolve(
-    template_name: str = typer.Argument(..., help="Template name to resolve (e.g., spec-template)"),
+    template_name: str = typer.Argument(..., help="Template name to resolve (e.g., plan-template)"),
 ):
     """Show which template will be resolved for a given name."""
     from .presets import PresetResolver

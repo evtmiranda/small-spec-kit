@@ -67,10 +67,10 @@ def valid_pack_data():
             "templates": [
                 {
                     "type": "template",
-                    "name": "spec-template",
-                    "file": "templates/spec-template.md",
+                    "name": "plan-template",
+                    "file": "templates/plan-template.md",
                     "description": "Custom spec template",
-                    "replaces": "spec-template",
+                    "replaces": "plan-template",
                 }
             ]
         },
@@ -94,7 +94,7 @@ def pack_dir(temp_dir, valid_pack_data):
     templates_dir.mkdir()
 
     # Write template file
-    tmpl_file = templates_dir / "spec-template.md"
+    tmpl_file = templates_dir / "plan-template.md"
     tmpl_file.write_text("# Custom Spec Template\n\nThis is a custom template.\n")
 
     return p_dir
@@ -115,7 +115,7 @@ def project_dir(temp_dir):
     templates_dir.mkdir()
 
     # Create core spec-template
-    core_spec = templates_dir / "spec-template.md"
+    core_spec = templates_dir / "plan-template.md"
     core_spec.write_text("# Core Spec Template\n")
 
     # Create core plan-template
@@ -265,9 +265,9 @@ class TestPresetManifest:
     def test_multiple_templates(self, temp_dir, valid_pack_data):
         """Test pack with multiple templates of different types."""
         valid_pack_data["provides"]["templates"] = [
-            {"type": "template", "name": "spec-template", "file": "templates/spec-template.md"},
             {"type": "template", "name": "plan-template", "file": "templates/plan-template.md"},
-            {"type": "command", "name": "specify", "file": "commands/specify.md"},
+            {"type": "template", "name": "checklist-template", "file": "templates/checklist-template.md"},
+            {"type": "command", "name": "plan", "file": "commands/plan.md"},
             {"type": "script", "name": "create-new-feature", "file": "scripts/create-new-feature.sh"},
         ]
         manifest_path = temp_dir / "preset.yml"
@@ -554,7 +554,7 @@ class TestPresetManager:
         installed_dir = project_dir / ".specify" / "presets" / "test-pack"
         assert installed_dir.exists()
         assert (installed_dir / "preset.yml").exists()
-        assert (installed_dir / "templates" / "spec-template.md").exists()
+        assert (installed_dir / "templates" / "plan-template.md").exists()
 
     def test_install_already_installed(self, project_dir, pack_dir):
         """Test installing an already-installed pack raises error."""
@@ -573,7 +573,7 @@ class TestPresetManager:
         with open(manifest_path, 'w') as f:
             yaml.dump(valid_pack_data, f)
         (incompat_dir / "templates").mkdir()
-        (incompat_dir / "templates" / "spec-template.md").write_text("test")
+        (incompat_dir / "templates" / "plan-template.md").write_text("test")
 
         manager = PresetManager(project_dir)
         with pytest.raises(PresetCompatibilityError):
@@ -768,9 +768,9 @@ class TestPresetResolver:
     def test_resolve_core_template(self, project_dir):
         """Test resolving a core template."""
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
-        assert result.name == "spec-template.md"
+        assert result.name == "plan-template.md"
         assert "Core Spec Template" in result.read_text()
 
     def test_resolve_nonexistent(self, project_dir):
@@ -791,7 +791,7 @@ class TestPresetResolver:
         with open(pack_a_dir / "preset.yml", 'w') as f:
             yaml.dump(data_a, f)
         (pack_a_dir / "templates").mkdir()
-        (pack_a_dir / "templates" / "spec-template.md").write_text("# From Pack A\n")
+        (pack_a_dir / "templates" / "plan-template.md").write_text("# From Pack A\n")
 
         # Create pack B (priority 1 — higher precedence)
         pack_b_dir = temp_dir / "pack-b"
@@ -801,7 +801,7 @@ class TestPresetResolver:
         with open(pack_b_dir / "preset.yml", 'w') as f:
             yaml.dump(data_b, f)
         (pack_b_dir / "templates").mkdir()
-        (pack_b_dir / "templates" / "spec-template.md").write_text("# From Pack B\n")
+        (pack_b_dir / "templates" / "plan-template.md").write_text("# From Pack B\n")
 
         # Install A first (priority 10), B second (priority 1)
         manager.install_from_directory(pack_a_dir, "0.1.5", priority=10)
@@ -809,7 +809,7 @@ class TestPresetResolver:
 
         # Pack B should win because lower priority number
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
         assert "From Pack B" in result.read_text()
 
@@ -818,11 +818,11 @@ class TestPresetResolver:
         # Create override
         overrides_dir = project_dir / ".specify" / "templates" / "overrides"
         overrides_dir.mkdir(parents=True)
-        override = overrides_dir / "spec-template.md"
+        override = overrides_dir / "plan-template.md"
         override.write_text("# Override Spec Template\n")
 
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
         assert "Override Spec Template" in result.read_text()
 
@@ -833,7 +833,7 @@ class TestPresetResolver:
         manager.install_from_directory(pack_dir, "0.1.5")
 
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
         assert "Custom Spec Template" in result.read_text()
 
@@ -846,11 +846,11 @@ class TestPresetResolver:
         # Create override
         overrides_dir = project_dir / ".specify" / "templates" / "overrides"
         overrides_dir.mkdir(parents=True)
-        override = overrides_dir / "spec-template.md"
+        override = overrides_dir / "plan-template.md"
         override.write_text("# Override Spec Template\n")
 
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
         assert "Override Spec Template" in result.read_text()
 
@@ -917,7 +917,7 @@ class TestPresetResolver:
         ext_dir = project_dir / ".specify" / "extensions" / "my-ext"
         ext_templates_dir = ext_dir / "templates"
         ext_templates_dir.mkdir(parents=True)
-        ext_template = ext_templates_dir / "spec-template.md"
+        ext_template = ext_templates_dir / "plan-template.md"
         ext_template.write_text("# Extension Spec Template\n")
 
         # Install a pack with the same template
@@ -925,7 +925,7 @@ class TestPresetResolver:
         manager.install_from_directory(pack_dir, "0.1.5")
 
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
         # Pack should win over extension
         assert "Custom Spec Template" in result.read_text()
@@ -933,20 +933,20 @@ class TestPresetResolver:
     def test_resolve_with_source_core(self, project_dir):
         """Test resolve_with_source for core template."""
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve_with_source("spec-template")
+        result = resolver.resolve_with_source("plan-template")
         assert result is not None
         assert result["source"] == "core"
-        assert "spec-template.md" in result["path"]
+        assert "plan-template.md" in result["path"]
 
     def test_resolve_with_source_override(self, project_dir):
         """Test resolve_with_source for override template."""
         overrides_dir = project_dir / ".specify" / "templates" / "overrides"
         overrides_dir.mkdir(parents=True)
-        override = overrides_dir / "spec-template.md"
+        override = overrides_dir / "plan-template.md"
         override.write_text("# Override\n")
 
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve_with_source("spec-template")
+        result = resolver.resolve_with_source("plan-template")
         assert result is not None
         assert result["source"] == "project override"
 
@@ -956,7 +956,7 @@ class TestPresetResolver:
         manager.install_from_directory(pack_dir, "0.1.5")
 
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve_with_source("spec-template")
+        result = resolver.resolve_with_source("plan-template")
         assert result is not None
         assert "test-pack" in result["source"]
         assert "v1.0.0" in result["source"]
@@ -1291,7 +1291,7 @@ class TestIntegration:
 
         # Resolve — pack template should win over core
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
         assert "Custom Spec Template" in result.read_text()
 
@@ -1299,7 +1299,7 @@ class TestIntegration:
         manager.remove("test-pack")
 
         # Resolve — should fall back to core
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
         assert "Core Spec Template" in result.read_text()
 
@@ -1308,36 +1308,36 @@ class TestIntegration:
         resolver = PresetResolver(project_dir)
 
         # Core should resolve
-        result = resolver.resolve_with_source("spec-template")
+        result = resolver.resolve_with_source("plan-template")
         assert result["source"] == "core"
 
         # Add extension template
         ext_dir = project_dir / ".specify" / "extensions" / "my-ext"
         ext_templates_dir = ext_dir / "templates"
         ext_templates_dir.mkdir(parents=True)
-        (ext_templates_dir / "spec-template.md").write_text("# Extension\n")
+        (ext_templates_dir / "plan-template.md").write_text("# Extension\n")
 
         # Register extension in registry
         extensions_dir = project_dir / ".specify" / "extensions"
         ext_registry = ExtensionRegistry(extensions_dir)
         ext_registry.add("my-ext", {"version": "1.0.0", "priority": 10})
 
-        result = resolver.resolve_with_source("spec-template")
+        result = resolver.resolve_with_source("plan-template")
         assert result["source"] == "extension:my-ext v1.0.0"
 
         # Install pack — should win over extension
         manager = PresetManager(project_dir)
         manager.install_from_directory(pack_dir, "0.1.5")
 
-        result = resolver.resolve_with_source("spec-template")
+        result = resolver.resolve_with_source("plan-template")
         assert "test-pack" in result["source"]
 
         # Add override — should win over pack
         overrides_dir = project_dir / ".specify" / "templates" / "overrides"
         overrides_dir.mkdir(parents=True)
-        (overrides_dir / "spec-template.md").write_text("# Override\n")
+        (overrides_dir / "plan-template.md").write_text("# Override\n")
 
-        result = resolver.resolve_with_source("spec-template")
+        result = resolver.resolve_with_source("plan-template")
         assert result["source"] == "project override"
 
     def test_install_from_zip_then_resolve(self, project_dir, pack_dir, temp_dir):
@@ -1356,7 +1356,7 @@ class TestIntegration:
 
         # Resolve
         resolver = PresetResolver(project_dir)
-        result = resolver.resolve("spec-template")
+        result = resolver.resolve("plan-template")
         assert result is not None
         assert "Custom Spec Template" in result.read_text()
 
@@ -1643,9 +1643,7 @@ class TestPresetCatalogMultiCatalog:
 SELF_TEST_PRESET_DIR = Path(__file__).parent.parent / "presets" / "self-test"
 
 CORE_TEMPLATE_NAMES = [
-    "spec-template",
     "plan-template",
-    "tasks-template",
     "checklist-template",
     "constitution-template",
     "agent-file-template",
@@ -1761,11 +1759,11 @@ class TestSelfTestPreset:
         manifest = PresetManifest(SELF_TEST_PRESET_DIR / "preset.yml")
         commands = [t for t in manifest.templates if t["type"] == "command"]
         assert len(commands) >= 1
-        assert commands[0]["name"] == "speckit.specify"
+        assert commands[0]["name"] == "speckit.plan"
 
     def test_self_test_command_file_exists(self):
         """Verify the self-test command file exists on disk."""
-        cmd_path = SELF_TEST_PRESET_DIR / "commands" / "speckit.specify.md"
+        cmd_path = SELF_TEST_PRESET_DIR / "commands" / "speckit.plan.md"
         assert cmd_path.exists()
         content = cmd_path.read_text()
         assert "preset:self-test" in content
@@ -1780,7 +1778,7 @@ class TestSelfTestPreset:
         manager.install_from_directory(SELF_TEST_PRESET_DIR, "0.1.5")
 
         # Check the command was registered
-        cmd_file = claude_dir / "speckit.specify.md"
+        cmd_file = claude_dir / "speckit.plan.md"
         assert cmd_file.exists(), "Command not registered in .claude/commands/"
         content = cmd_file.read_text()
         assert "preset:self-test" in content
@@ -1795,7 +1793,7 @@ class TestSelfTestPreset:
         manager.install_from_directory(SELF_TEST_PRESET_DIR, "0.1.5")
 
         # Check the command was registered in TOML format
-        cmd_file = gemini_dir / "speckit.specify.toml"
+        cmd_file = gemini_dir / "speckit.plan.toml"
         assert cmd_file.exists(), "Command not registered in .gemini/commands/"
         content = cmd_file.read_text()
         assert "prompt" in content  # TOML format has a prompt field
@@ -1809,7 +1807,7 @@ class TestSelfTestPreset:
         manager = PresetManager(project_dir)
         manager.install_from_directory(SELF_TEST_PRESET_DIR, "0.1.5")
 
-        cmd_file = claude_dir / "speckit.specify.md"
+        cmd_file = claude_dir / "speckit.plan.md"
         assert cmd_file.exists()
 
         manager.remove("self-test")
@@ -1965,7 +1963,7 @@ class TestPresetSkills:
         # Also create the claude commands dir so commands get registered
         (project_dir / ".claude" / "commands").mkdir(parents=True, exist_ok=True)
 
-        # Install self-test preset (has a command override for speckit.specify)
+        # Install self-test preset (has a command override for speckit.plan)
         manager = PresetManager(project_dir)
         SELF_TEST_DIR = Path(__file__).parent.parent / "presets" / "self-test"
         manager.install_from_directory(SELF_TEST_DIR, "0.1.5")
@@ -2041,7 +2039,7 @@ class TestPresetSkills:
         # Set up core command template in the project so restoration works
         core_cmds = project_dir / ".specify" / "templates" / "commands"
         core_cmds.mkdir(parents=True, exist_ok=True)
-        (core_cmds / "specify.md").write_text("---\ndescription: Core specify command\n---\n\nCore specify body\n")
+        (core_cmds / "plan.md").write_text("---\ndescription: Core specify command\n---\n\nCore specify body\n")
 
         manager = PresetManager(project_dir)
         SELF_TEST_DIR = Path(__file__).parent.parent / "presets" / "self-test"
@@ -2054,11 +2052,11 @@ class TestPresetSkills:
         # Remove the preset
         manager.remove("self-test")
 
-        # Skill should be restored (core specify.md template exists)
+        # Skill should be restored (core plan.md template exists)
         assert skill_file.exists(), "Skill should still exist after preset removal"
         content = skill_file.read_text()
         assert "preset:self-test" not in content, "Preset content should be gone"
-        assert "templates/commands/specify.md" in content, "Should reference core template"
+        assert "templates/commands/plan.md" in content, "Should reference core template"
 
     def test_skill_restored_on_remove_resolves_script_placeholders(self, project_dir):
         """Core restore should resolve {SCRIPT}/{ARGS} placeholders like other skill paths."""
@@ -2069,7 +2067,7 @@ class TestPresetSkills:
 
         core_cmds = project_dir / ".specify" / "templates" / "commands"
         core_cmds.mkdir(parents=True, exist_ok=True)
-        (core_cmds / "specify.md").write_text(
+        (core_cmds / "plan.md").write_text(
             "---\n"
             "description: Core specify command\n"
             "scripts:\n"
@@ -2180,7 +2178,7 @@ class TestPresetSkills:
             "---\n"
             "description: Extension fakeext cmd\n"
             "scripts:\n"
-            "  sh: ../../scripts/bash/setup-plan.sh --json \"{ARGS}\"\n"
+            "  sh: ../../scripts/bash/check-prerequisites.sh --json \"{ARGS}\"\n"
             "---\n\n"
             "extension:fakeext\n"
             "Run {SCRIPT}\n"
@@ -2248,7 +2246,7 @@ class TestPresetSkills:
         assert "preset:ext-skill-restore" not in content
         assert "source: extension:fakeext" in content
         assert "extension:fakeext" in content
-        assert '.specify/scripts/bash/setup-plan.sh --json "$ARGUMENTS"' in content
+        assert '.specify/scripts/bash/check-prerequisites.sh --json "$ARGUMENTS"' in content
         assert "# Fakeext Cmd Skill" in content
 
     def test_preset_remove_skips_skill_dir_without_skill_file(self, project_dir, temp_dir):
@@ -2311,7 +2309,7 @@ class TestPresetSkills:
         """Preset overrides should still target legacy dotted Kimi skill directories."""
         self._write_init_options(project_dir, ai="kimi")
         skills_dir = project_dir / ".kimi" / "skills"
-        self._create_skill(skills_dir, "speckit.specify", body="untouched")
+        self._create_skill(skills_dir, "speckit.plan", body="untouched")
 
         (project_dir / ".kimi" / "commands").mkdir(parents=True, exist_ok=True)
 
@@ -2319,14 +2317,14 @@ class TestPresetSkills:
         self_test_dir = Path(__file__).parent.parent / "presets" / "self-test"
         manager.install_from_directory(self_test_dir, "0.1.5")
 
-        skill_file = skills_dir / "speckit.specify" / "SKILL.md"
+        skill_file = skills_dir / "speckit.plan" / "SKILL.md"
         assert skill_file.exists()
         content = skill_file.read_text()
         assert "preset:self-test" in content
-        assert "name: speckit.specify" in content
+        assert "name: speckit.plan" in content
 
         metadata = manager.registry.get("self-test")
-        assert "speckit.specify" in metadata.get("registered_skills", [])
+        assert "speckit.plan" in metadata.get("registered_skills", [])
 
     def test_kimi_skill_updated_even_when_ai_skills_disabled(self, project_dir, temp_dir):
         """Kimi presets should still propagate command overrides to existing skills."""
@@ -2359,7 +2357,7 @@ class TestPresetSkills:
         preset_dir = temp_dir / "kimi-placeholder-override"
         preset_dir.mkdir()
         (preset_dir / "commands").mkdir()
-        (preset_dir / "commands" / "speckit.specify.md").write_text(
+        (preset_dir / "commands" / "speckit.plan.md").write_text(
             "---\n"
             "description: Kimi placeholder override\n"
             "scripts:\n"
@@ -2381,8 +2379,8 @@ class TestPresetSkills:
                 "templates": [
                     {
                         "type": "command",
-                        "name": "speckit.specify",
-                        "file": "commands/speckit.specify.md",
+                        "name": "speckit.plan",
+                        "file": "commands/speckit.plan.md",
                     }
                 ]
             },

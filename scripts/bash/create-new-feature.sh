@@ -305,13 +305,13 @@ fi
 FEATURE_DIR="$SPECS_DIR/$BRANCH_NAME"
 mkdir -p "$FEATURE_DIR"
 
-TEMPLATE=$(resolve_template "spec-template" "$REPO_ROOT") || true
-SPEC_FILE="$FEATURE_DIR/spec.md"
+TEMPLATE=$(resolve_template "plan-template" "$REPO_ROOT") || true
+PLAN_FILE="$FEATURE_DIR/plan.md"
 if [ -n "$TEMPLATE" ] && [ -f "$TEMPLATE" ]; then
-    cp "$TEMPLATE" "$SPEC_FILE"
+    cp "$TEMPLATE" "$PLAN_FILE"
 else
-    echo "Warning: Spec template not found; created empty spec file" >&2
-    touch "$SPEC_FILE"
+    echo "Warning: Plan template not found; created empty plan file" >&2
+    touch "$PLAN_FILE"
 fi
 
 # Inform the user how to persist the feature variable in their own shell
@@ -321,15 +321,15 @@ if $JSON_MODE; then
     if command -v jq >/dev/null 2>&1; then
         jq -cn \
             --arg branch_name "$BRANCH_NAME" \
-            --arg spec_file "$SPEC_FILE" \
+            --arg plan_file "$PLAN_FILE" \
             --arg feature_num "$FEATURE_NUM" \
-            '{BRANCH_NAME:$branch_name,SPEC_FILE:$spec_file,FEATURE_NUM:$feature_num}'
+            '{BRANCH_NAME:$branch_name,PLAN_FILE:$plan_file,FEATURE_NUM:$feature_num}'
     else
-        printf '{"BRANCH_NAME":"%s","SPEC_FILE":"%s","FEATURE_NUM":"%s"}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$SPEC_FILE")" "$(json_escape "$FEATURE_NUM")"
+        printf '{"BRANCH_NAME":"%s","PLAN_FILE":"%s","FEATURE_NUM":"%s"}\n' "$(json_escape "$BRANCH_NAME")" "$(json_escape "$PLAN_FILE")" "$(json_escape "$FEATURE_NUM")"
     fi
 else
     echo "BRANCH_NAME: $BRANCH_NAME"
-    echo "SPEC_FILE: $SPEC_FILE"
+    echo "PLAN_FILE: $PLAN_FILE"
     echo "FEATURE_NUM: $FEATURE_NUM"
     printf '# To persist in your shell: export SPECIFY_FEATURE=%q\n' "$BRANCH_NAME"
 fi

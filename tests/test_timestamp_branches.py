@@ -101,7 +101,7 @@ class TestTimestampBranch:
         result = run_script(git_repo, "--json", "--timestamp", "--short-name", "api", "API feature")
         assert result.returncode == 0, result.stderr
         data = json.loads(result.stdout)
-        for key in ("BRANCH_NAME", "SPEC_FILE", "FEATURE_NUM"):
+        for key in ("BRANCH_NAME", "PLAN_FILE", "FEATURE_NUM"):
             assert key in data, f"missing {key} in JSON: {data}"
         assert re.match(r"^\d{8}-\d{6}$", data["FEATURE_NUM"])
 

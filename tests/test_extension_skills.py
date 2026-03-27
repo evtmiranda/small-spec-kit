@@ -394,7 +394,7 @@ class TestExtensionSkillRegistration:
             "---\n"
             "description: Scripted plan command\n"
             "scripts:\n"
-            "  sh: ../../scripts/bash/setup-plan.sh --json \"{ARGS}\"\n"
+            "  sh: ../../scripts/bash/check-prerequisites.sh --json \"{ARGS}\"\n"
             "agent_scripts:\n"
             "  sh: ../../scripts/bash/update-agent-context.sh __AGENT__\n"
             "---\n\n"
@@ -411,7 +411,7 @@ class TestExtensionSkillRegistration:
         assert "{AGENT_SCRIPT}" not in content
         assert "{ARGS}" not in content
         assert "__AGENT__" not in content
-        assert '.specify/scripts/bash/setup-plan.sh --json "$ARGUMENTS"' in content
+        assert '.specify/scripts/bash/check-prerequisites.sh --json "$ARGUMENTS"' in content
         assert ".specify/scripts/bash/update-agent-context.sh claude" in content
         assert ".specify/templates/checklist.md" in content
         assert ".specify/memory/constitution.md" in content

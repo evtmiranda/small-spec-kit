@@ -269,28 +269,28 @@ if ($hasGit) {
 $featureDir = Join-Path $specsDir $branchName
 New-Item -ItemType Directory -Path $featureDir -Force | Out-Null
 
-$template = Resolve-Template -TemplateName 'spec-template' -RepoRoot $repoRoot
-$specFile = Join-Path $featureDir 'spec.md'
-if ($template -and (Test-Path $template)) { 
-    Copy-Item $template $specFile -Force 
-} else { 
-    New-Item -ItemType File -Path $specFile | Out-Null 
+$template = Resolve-Template -TemplateName 'plan-template' -RepoRoot $repoRoot
+$planFile = Join-Path $featureDir 'plan.md'
+if ($template -and (Test-Path $template)) {
+    Copy-Item $template $planFile -Force
+} else {
+    New-Item -ItemType File -Path $planFile | Out-Null
 }
 
 # Set the SPECIFY_FEATURE environment variable for the current session
 $env:SPECIFY_FEATURE = $branchName
 
 if ($Json) {
-    $obj = [PSCustomObject]@{ 
+    $obj = [PSCustomObject]@{
         BRANCH_NAME = $branchName
-        SPEC_FILE = $specFile
+        PLAN_FILE = $planFile
         FEATURE_NUM = $featureNum
         HAS_GIT = $hasGit
     }
     $obj | ConvertTo-Json -Compress
 } else {
     Write-Output "BRANCH_NAME: $branchName"
-    Write-Output "SPEC_FILE: $specFile"
+    Write-Output "PLAN_FILE: $planFile"
     Write-Output "FEATURE_NUM: $featureNum"
     Write-Output "HAS_GIT: $hasGit"
     Write-Output "SPECIFY_FEATURE environment variable set to: $branchName"

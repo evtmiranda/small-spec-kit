@@ -1,14 +1,14 @@
-# Quick Start Guide
+# Quick start guide
 
 This guide will help you get started with Spec-Driven Development using Spec Kit.
 
 > [!NOTE]
 > All automation scripts now provide both Bash (`.sh`) and PowerShell (`.ps1`) variants. The `specify` CLI auto-selects based on OS unless you pass `--script sh|ps`.
 
-## The 6-Step Process
+## The 3-step process
 
 > [!TIP]
-> **Context Awareness**: Spec Kit commands automatically detect the active feature based on your current Git branch (e.g., `001-feature-name`). To switch between different specifications, simply switch Git branches.
+> **Context awareness**: Spec Kit commands automatically detect the active feature based on your current Git branch (e.g., `001-feature-name`). To switch between different plans, simply switch Git branches.
 
 ### Step 1: Install Specify
 
@@ -16,79 +16,50 @@ This guide will help you get started with Spec-Driven Development using Spec Kit
 
 ```bash
 # Create a new project directory
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME>
+uvx --from git+https://github.com/evtmiranda/small-spec-kit.git specify init <PROJECT_NAME>
 
 # OR initialize in the current directory
-uvx --from git+https://github.com/github/spec-kit.git specify init .
+uvx --from git+https://github.com/evtmiranda/small-spec-kit.git specify init .
 ```
 
 Pick script type explicitly (optional):
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --script ps  # Force PowerShell
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --script sh  # Force POSIX shell
+uvx --from git+https://github.com/evtmiranda/small-spec-kit.git specify init <PROJECT_NAME> --script ps  # Force PowerShell
+uvx --from git+https://github.com/evtmiranda/small-spec-kit.git specify init <PROJECT_NAME> --script sh  # Force POSIX shell
 ```
 
-### Step 2: Define Your Constitution
+### Step 2: Plan your feature
 
-**In your AI Agent's chat interface**, use the `/speckit.constitution` slash command to establish the core rules and principles for your project. You should provide your project's specific principles as arguments.
+**In your AI Agent's chat interface**, optionally set up a constitution first, then use `/speckit.plan` to describe what you want to build, including your tech stack:
 
 ```markdown
-/speckit.constitution This project follows a "Library-First" approach. All features must be implemented as standalone libraries first. We use TDD strictly. We prefer functional programming patterns.
+/speckit.constitution This project follows a "Library-First" approach. All features must be implemented as standalone libraries first. We use TDD strictly.
 ```
-
-### Step 3: Create the Spec
-
-**In the chat**, use the `/speckit.specify` slash command to describe what you want to build. Focus on the **what** and **why**, not the tech stack.
 
 ```markdown
-/speckit.specify Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Albums are never in other nested albums. Within each album, photos are previewed in a tile-like interface.
+/speckit.plan Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Use Vite with vanilla HTML, CSS, and JavaScript. Metadata is stored in a local SQLite database.
 ```
 
-### Step 4: Refine the Spec
+This creates a unified `plan.md` with requirements, user stories, technical decisions, data model, project structure, and a phased task breakdown.
 
-**In the chat**, use the `/speckit.clarify` slash command to identify and resolve ambiguities in your specification. You can provide specific focus areas as arguments.
-
-```bash
-/speckit.clarify Focus on security and performance requirements.
-```
-
-### Step 5: Create a Technical Implementation Plan
-
-**In the chat**, use the `/speckit.plan` slash command to provide your tech stack and architecture choices.
+### Step 3: Execute the plan
 
 ```markdown
-/speckit.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
-```
-
-### Step 6: Break Down and Implement
-
-**In the chat**, use the `/speckit.tasks` slash command to create an actionable task list.
-
-```markdown
-/speckit.tasks
-```
-
-Optionally, validate the plan with `/speckit.analyze`:
-
-```markdown
-/speckit.analyze
-```
-
-Then, use the `/speckit.implement` slash command to execute the plan.
-
-```markdown
-/speckit.implement
+/speckit.execute
 ```
 
 > [!TIP]
-> **Phased Implementation**: For complex projects, implement in phases to avoid overwhelming the agent's context. Start with core functionality, validate it works, then add features incrementally.
+> **Refine before executing**: If anything needs adjustment, use `/speckit.refine` to modify the plan before executing. For example: `/speckit.refine Change the database to PostgreSQL`.
 
-## Detailed Example: Building Taskify
+> [!TIP]
+> **Phased implementation**: For complex projects, implement in phases to avoid overwhelming the agent's context. Start with core functionality, validate it works, then add features incrementally.
+
+## Detailed example: building Taskify
 
 Here's a complete example of building a team productivity platform:
 
-### Step 1: Define Constitution
+### Step 1: Define constitution
 
 Initialize the project's constitution to set ground rules:
 
@@ -96,83 +67,43 @@ Initialize the project's constitution to set ground rules:
 /speckit.constitution Taskify is a "Security-First" application. All user inputs must be validated. We use a microservices architecture. Code must be fully documented.
 ```
 
-### Step 2: Define Requirements with `/speckit.specify`
+### Step 2: Plan the feature with `/speckit.plan`
+
+Describe what you want to build AND your tech stack in one command:
 
 ```text
-Develop Taskify, a team productivity platform. It should allow users to create projects, add team members,
-assign tasks, comment and move tasks between boards in Kanban style. In this initial phase for this feature,
-let's call it "Create Taskify," let's have multiple users but the users will be declared ahead of time, predefined.
-I want five users in two different categories, one product manager and four engineers. Let's create three
-different sample projects. Let's have the standard Kanban columns for the status of each task, such as "To Do,"
-"In Progress," "In Review," and "Done." There will be no login for this application as this is just the very
-first testing thing to ensure that our basic features are set up.
+/speckit.plan Develop Taskify, a team productivity platform. It should allow users to create projects, add team members,
+assign tasks, comment and move tasks between boards in Kanban style. Five predefined users (one PM, four engineers),
+no login needed. Standard Kanban columns: To Do, In Progress, In Review, Done. Drag and drop between columns.
+Users see their assigned cards in a different color. Comments are editable/deletable only by the author.
+Use .NET Aspire with Blazor server, PostgreSQL, and REST APIs for projects, tasks, and notifications.
 ```
 
-### Step 3: Refine the Specification
+### Step 3: Refine (optional)
 
-Use the `/speckit.clarify` command to interactively resolve any ambiguities in your specification. You can also provide specific details you want to ensure are included.
+If anything needs adjustment:
 
 ```bash
-/speckit.clarify I want to clarify the task card details. For each task in the UI for a task card, you should be able to change the current status of the task between the different columns in the Kanban work board. You should be able to leave an unlimited number of comments for a particular card. You should be able to, from that task card, assign one of the valid users.
+/speckit.refine Add real-time updates via SignalR and for each sample project, create 5-15 tasks randomly distributed across completion states
 ```
 
-You can continue to refine the spec with more details using `/speckit.clarify`:
+### Step 4: Execute
 
 ```bash
-/speckit.clarify When you first launch Taskify, it's going to give you a list of the five users to pick from. There will be no password required. When you click on a user, you go into the main view, which displays the list of projects. When you click on a project, you open the Kanban board for that project. You're going to see the columns. You'll be able to drag and drop cards back and forth between different columns. You will see any cards that are assigned to you, the currently logged in user, in a different color from all the other ones, so you can quickly see yours. You can edit any comments that you make, but you can't edit comments that other people made. You can delete any comments that you made, but you can't delete comments anybody else made.
-```
-
-### Step 4: Validate the Spec
-
-Validate the specification checklist using the `/speckit.checklist` command:
-
-```bash
-/speckit.checklist
-```
-
-### Step 5: Generate Technical Plan with `/speckit.plan`
-
-Be specific about your tech stack and technical requirements:
-
-```bash
-/speckit.plan We are going to generate this using .NET Aspire, using Postgres as the database. The frontend should use Blazor server with drag-and-drop task boards, real-time updates. There should be a REST API created with a projects API, tasks API, and a notifications API.
-```
-
-### Step 6: Define Tasks
-
-Generate an actionable task list using the `/speckit.tasks` command:
-
-```bash
-/speckit.tasks
-```
-
-### Step 7: Validate and Implement
-
-Have your AI agent audit the implementation plan using `/speckit.analyze`:
-
-```bash
-/speckit.analyze
-```
-
-Finally, implement the solution:
-
-```bash
-/speckit.implement
+/speckit.execute
 ```
 
 > [!TIP]
-> **Phased Implementation**: For large projects like Taskify, consider implementing in phases (e.g., Phase 1: Basic project/task structure, Phase 2: Kanban functionality, Phase 3: Comments and assignments). This prevents context saturation and allows for validation at each stage.
+> **Phased implementation**: For large projects like Taskify, consider implementing in phases (e.g., Phase 1: Basic project/task structure, Phase 2: Kanban functionality, Phase 3: Comments and assignments). This prevents context saturation and allows for validation at each stage.
 
-## Key Principles
+## Key principles
 
-- **Be explicit** about what you're building and why
-- **Don't focus on tech stack** during specification phase
-- **Iterate and refine** your specifications before implementation
-- **Validate** the plan before coding begins
+- **Be explicit** about what you're building, why, and what tech stack to use
+- **Iterate with `/speckit.refine`** before executing
 - **Let the AI agent handle** the implementation details
 
-## Next Steps
+## Next steps
 
-- Read the [complete methodology](https://github.com/github/spec-kit/blob/main/spec-driven.md) for in-depth guidance
-- Check out [more examples](https://github.com/github/spec-kit/tree/main/templates) in the repository
-- Explore the [source code on GitHub](https://github.com/github/spec-kit)
+- Read the [complete methodology](https://github.com/evtmiranda/small-spec-kit/blob/main/spec-driven.md) for in-depth guidance
+- Check out [more examples](https://github.com/evtmiranda/small-spec-kit/tree/main/templates) in the repository
+- Explore the [source code on GitHub](https://github.com/evtmiranda/small-spec-kit)

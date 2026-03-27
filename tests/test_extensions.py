@@ -766,8 +766,8 @@ $ARGUMENTS
         registrar = AgentCommandRegistrar()
         original = {
             "scripts": {
-                "sh": "../../scripts/bash/setup-plan.sh {ARGS}",
-                "ps": "../../scripts/powershell/setup-plan.ps1 {ARGS}",
+                "sh": "../../scripts/bash/check-prerequisites.sh {ARGS}",
+                "ps": "../../scripts/powershell/check-prerequisites.ps1 {ARGS}",
             }
         }
         before = json.loads(json.dumps(original))
@@ -775,8 +775,8 @@ $ARGUMENTS
         adjusted = registrar._adjust_script_paths(original)
 
         assert original == before
-        assert adjusted["scripts"]["sh"] == ".specify/scripts/bash/setup-plan.sh {ARGS}"
-        assert adjusted["scripts"]["ps"] == ".specify/scripts/powershell/setup-plan.ps1 {ARGS}"
+        assert adjusted["scripts"]["sh"] == ".specify/scripts/bash/check-prerequisites.sh {ARGS}"
+        assert adjusted["scripts"]["ps"] == ".specify/scripts/powershell/check-prerequisites.ps1 {ARGS}"
 
     def test_adjust_script_paths_preserves_extension_local_paths(self):
         """Extension-local script paths should not be rewritten into .specify/.specify."""
@@ -785,14 +785,14 @@ $ARGUMENTS
         original = {
             "scripts": {
                 "sh": ".specify/extensions/test-ext/scripts/setup.sh {ARGS}",
-                "ps": "scripts/powershell/setup-plan.ps1 {ARGS}",
+                "ps": "scripts/powershell/check-prerequisites.ps1 {ARGS}",
             }
         }
 
         adjusted = registrar._adjust_script_paths(original)
 
         assert adjusted["scripts"]["sh"] == ".specify/extensions/test-ext/scripts/setup.sh {ARGS}"
-        assert adjusted["scripts"]["ps"] == ".specify/scripts/powershell/setup-plan.ps1 {ARGS}"
+        assert adjusted["scripts"]["ps"] == ".specify/scripts/powershell/check-prerequisites.ps1 {ARGS}"
 
     def test_rewrite_project_relative_paths_preserves_extension_local_body_paths(self):
         """Body rewrites should preserve extension-local assets while fixing top-level refs."""
@@ -800,13 +800,13 @@ $ARGUMENTS
 
         body = (
             "Read `.specify/extensions/test-ext/templates/spec.md`\n"
-            "Run scripts/bash/setup-plan.sh\n"
+            "Run scripts/bash/check-prerequisites.sh\n"
         )
 
         rewritten = AgentCommandRegistrar._rewrite_project_relative_paths(body)
 
         assert ".specify/extensions/test-ext/templates/spec.md" in rewritten
-        assert ".specify/scripts/bash/setup-plan.sh" in rewritten
+        assert ".specify/scripts/bash/check-prerequisites.sh" in rewritten
 
     def test_render_toml_command_handles_embedded_triple_double_quotes(self):
         """TOML renderer should stay valid when body includes triple double-quotes."""
@@ -996,8 +996,8 @@ $ARGUMENTS
             """---
 description: "Scripted command"
 scripts:
-  sh: ../../scripts/bash/setup-plan.sh --json "{ARGS}"
-  ps: ../../scripts/powershell/setup-plan.ps1 -Json
+  sh: ../../scripts/bash/check-prerequisites.sh --json "{ARGS}"
+  ps: ../../scripts/powershell/check-prerequisites.ps1 -Json
 agent_scripts:
   sh: ../../scripts/bash/update-agent-context.sh __AGENT__
   ps: ../../scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
@@ -1028,7 +1028,7 @@ Agent __AGENT__
         assert "{AGENT_SCRIPT}" not in content
         assert "__AGENT__" not in content
         assert "{ARGS}" not in content
-        assert '.specify/scripts/bash/setup-plan.sh --json "$ARGUMENTS"' in content
+        assert '.specify/scripts/bash/check-prerequisites.sh --json "$ARGUMENTS"' in content
         assert ".specify/scripts/bash/update-agent-context.sh codex" in content
 
     def test_codex_skill_alias_frontmatter_matches_alias_name(self, project_dir, temp_dir):
@@ -1113,8 +1113,8 @@ Agent __AGENT__
             """---
 description: "Fallback scripted command"
 scripts:
-  sh: ../../scripts/bash/setup-plan.sh --json "{ARGS}"
-  ps: ../../scripts/powershell/setup-plan.ps1 -Json
+  sh: ../../scripts/bash/check-prerequisites.sh --json "{ARGS}"
+  ps: ../../scripts/powershell/check-prerequisites.ps1 -Json
 agent_scripts:
   sh: ../../scripts/bash/update-agent-context.sh __AGENT__
 ---
@@ -1138,7 +1138,7 @@ Then {AGENT_SCRIPT}
         content = skill_file.read_text()
         assert "{SCRIPT}" not in content
         assert "{AGENT_SCRIPT}" not in content
-        assert '.specify/scripts/bash/setup-plan.sh --json "$ARGUMENTS"' in content
+        assert '.specify/scripts/bash/check-prerequisites.sh --json "$ARGUMENTS"' in content
         assert ".specify/scripts/bash/update-agent-context.sh codex" in content
 
     def test_codex_skill_registration_handles_non_dict_init_options(
@@ -1176,7 +1176,7 @@ Then {AGENT_SCRIPT}
             """---
 description: "List init scripted command"
 scripts:
-  sh: ../../scripts/bash/setup-plan.sh --json "{ARGS}"
+  sh: ../../scripts/bash/check-prerequisites.sh --json "{ARGS}"
 ---
 
 Run {SCRIPT}
@@ -1195,7 +1195,7 @@ Run {SCRIPT}
         registrar.register_commands_for_agent("codex", manifest, ext_dir, project_dir)
 
         content = (skills_dir / "speckit-list-plan" / "SKILL.md").read_text()
-        assert '.specify/scripts/bash/setup-plan.sh --json "$ARGUMENTS"' in content
+        assert '.specify/scripts/bash/check-prerequisites.sh --json "$ARGUMENTS"' in content
 
     def test_codex_skill_registration_fallback_prefers_powershell_on_windows(
         self, project_dir, temp_dir, monkeypatch
@@ -1234,8 +1234,8 @@ Run {SCRIPT}
             """---
 description: "Windows fallback scripted command"
 scripts:
-  sh: ../../scripts/bash/setup-plan.sh --json "{ARGS}"
-  ps: ../../scripts/powershell/setup-plan.ps1 -Json
+  sh: ../../scripts/bash/check-prerequisites.sh --json "{ARGS}"
+  ps: ../../scripts/powershell/check-prerequisites.ps1 -Json
 agent_scripts:
   sh: ../../scripts/bash/update-agent-context.sh __AGENT__
   ps: ../../scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
@@ -1257,9 +1257,9 @@ Then {AGENT_SCRIPT}
         assert skill_file.exists()
 
         content = skill_file.read_text()
-        assert ".specify/scripts/powershell/setup-plan.ps1 -Json" in content
+        assert ".specify/scripts/powershell/check-prerequisites.ps1 -Json" in content
         assert ".specify/scripts/powershell/update-agent-context.ps1 -AgentType codex" in content
-        assert ".specify/scripts/bash/setup-plan.sh" not in content
+        assert ".specify/scripts/bash/check-prerequisites.sh" not in content
 
     def test_register_commands_for_copilot(self, extension_dir, project_dir):
         """Test registering commands for Copilot agent with .agent.md extension."""

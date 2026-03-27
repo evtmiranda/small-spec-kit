@@ -1,30 +1,30 @@
-# Testing Extension Hooks
+# Testing extension hooks
 
 This directory contains a mock project to verify that LLM agents correctly identify and execute hook commands defined in `.specify/extensions.yml`.
 
-## Test 1: Testing `before_tasks` and `after_tasks`
+## Test 1: Testing `before_plan` and `after_plan`
 
 1. Open a chat with an LLM (like GitHub Copilot) in this project.
-2. Ask it to generate tasks for the current directory:
-   > "Please follow `/speckit.tasks` for the `./tests/hooks` directory."
-3. **Expected Behavior**: 
-   - Before doing any generation, the LLM should notice the `AUTOMATIC Pre-Hook` in `.specify/extensions.yml` under `before_tasks`.
-   - It should state it is executing `EXECUTE_COMMAND: pre_tasks_test`.
-   - It should then proceed to read the `.md` docs and produce a `tasks.md`.
-   - After generation, it should output the optional `after_tasks` hook (`post_tasks_test`) block, asking if you want to run it.
+2. Ask it to generate a plan for the current directory:
+   > "Please follow `/speckit.plan` for the `./tests/hooks` directory."
+3. **Expected behavior**:
+   - Before doing any generation, the LLM should notice the `AUTOMATIC Pre-Hook` in `.specify/extensions.yml` under `before_plan`.
+   - It should state it is executing `EXECUTE_COMMAND: pre_plan_test`.
+   - It should then proceed to read the docs and produce a `plan.md`.
+   - After generation, it should output the optional `after_plan` hook (`post_plan_test`) block, asking if you want to run it.
 
-## Test 2: Testing `before_implement` and `after_implement`
+## Test 2: Testing `before_execute` and `after_execute`
 
-*(Requires `tasks.md` from Test 1 to exist)*
+*(Requires `plan.md` from Test 1 to exist with a task breakdown)*
 
-1. In the same (or new) chat, ask the LLM to implement the tasks:
-   > "Please follow `/speckit.implement` for the `./tests/hooks` directory."
-2. **Expected Behavior**:
-   - The LLM should first check for `before_implement` hooks.
-   - It should state it is executing `EXECUTE_COMMAND: pre_implement_test` BEFORE doing any actual task execution.
+1. In the same (or new) chat, ask the LLM to execute the plan:
+   > "Please follow `/speckit.execute` for the `./tests/hooks` directory."
+2. **Expected behavior**:
+   - The LLM should first check for `before_execute` hooks.
+   - It should state it is executing `EXECUTE_COMMAND: pre_execute_test` BEFORE doing any actual task execution.
    - It should evaluate the checklists and execute the code writing tasks.
-   - Upon completion, it should output the optional `after_implement` hook (`post_implement_test`) block.
+   - Upon completion, it should output the optional `after_execute` hook (`post_execute_test`) block.
 
 ## How it works
 
-The templates for these commands in `templates/commands/tasks.md` and `templates/commands/implement.md` contains strict ordered lists. The new `before_*` hooks are explicitly formulated in a **Pre-Execution Checks** section prior to the outline to ensure they're evaluated first without breaking template step numbers.
+The templates for these commands in `templates/commands/plan.md` and `templates/commands/execute.md` contain strict ordered lists. The `before_*` hooks are explicitly formulated in a **Pre-Execution Checks** section prior to the outline to ensure they're evaluated first without breaking template step numbers.
